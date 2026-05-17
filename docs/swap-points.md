@@ -23,7 +23,7 @@ Everything else has a sensible default; touch only if you need to.
 
 **Files:**
 
-- `.claude/scripts/pnpm-locked-gate.sh` (the flock-protected shim
+- `.claude/scripts/gate1.sh` (the flock-protected shim
   the orchestrator calls).
 - `scripts/quality-gate.py` (the actual lint / build / typecheck
   invocation the shim delegates to).
@@ -92,19 +92,14 @@ CHECKS = {
    `scripts/quality-gate.py`; replace with your toolchain's
    equivalent (`shutil.which("cargo")` etc.).
 
-3. Edit `.claude/scripts/pnpm-locked-gate.sh`:
+3. Edit `.claude/scripts/gate1.sh`:
 
-   - Rename to `gate1.sh` if you prefer (and update references in
-     `.claude/scripts/orchestrate-block.prompt.md` §6.5,
-     `scripts/capture-baseline.sh`, and
-     `scripts/block-preflight.py`'s `REQUIRED_HARNESS_FILES`
-     tuple).
    - Replace the `PATH="$REPO_ROOT/node_modules/.bin:$PATH"` line
      with your stack's binary-path setup if needed (e.g. activate
      a Python venv).
-   - Update the lock filename `logs/locks/pnpm.lock` to
-     `logs/locks/gate1.lock` (or leave; it is opaque to the
-     orchestrator).
+   - The lock filename `logs/locks/gate1.lock` and the ledger
+     events `gate1_lock_acquired` / `gate1_lock_released` are
+     stack-neutral; no rename needed.
 
 4. Edit `scripts/block-preflight.py`:
 

@@ -4,7 +4,7 @@
 # Usage:
 #   bash scripts/capture-baseline.sh <BLOCK_ID>
 #
-# Runs the full Gate-1 pipeline via pnpm-locked-gate.sh --force, then
+# Runs the full Gate-1 pipeline via gate1.sh --force, then
 # fingerprints the raw outputs into docs/blocks/<BLOCK_ID>/baseline.json.
 # Call once when a block opens, and again only after a debt-paydown cluster
 # whose commit subject is "chore(block-<ID>): baseline refresh after
@@ -28,7 +28,7 @@ cd "$REPO_ROOT"
 echo ">> running Gate-1 pipeline to capture baseline for block $BLOCK_ID"
 # We do not care about the exit code here, baseline captures whatever errors
 # exist at block-open time, green or red.
-bash .claude/scripts/pnpm-locked-gate.sh --force || true
+bash .claude/scripts/gate1.sh --force || true
 
 echo ">> fingerprinting raw outputs"
 python3 scripts/baseline-diff.py --block "$BLOCK_ID" --mode capture

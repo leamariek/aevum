@@ -402,13 +402,13 @@ Emit `cluster_merge_attempted`, then `cluster_merge_succeeded` or
 ### 6.5 Gate 1, delta build
 
 The Gate 1 runner is project-configurable. Aevum ships a Node/pnpm
-default at `.claude/scripts/pnpm-locked-gate.sh`; the project swaps
+default at `.claude/scripts/gate1.sh`; the project swaps
 it for its own stack at the Gate-1 seam (see `docs/swap-points.md`).
 Whatever the swap, the contract is: exit 0 means pass; exit 1 means
 fail; the runner writes `logs/gates/gate1.json` atomically.
 
 ```
-bash .claude/scripts/pnpm-locked-gate.sh --force
+bash .claude/scripts/gate1.sh --force
 python3 scripts/baseline-diff.py --block <BLOCK> --mode diff
 ```
 

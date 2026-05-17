@@ -193,7 +193,7 @@ mechanically-checkable parts; review agents enforce the rest.
   Gate-1 error baseline at block open.
 - `python3 scripts/block-preflight.py <BLOCK_ID>`: draft-time
   validator.
-- `bash .claude/scripts/pnpm-locked-gate.sh --force`: default
+- `bash .claude/scripts/gate1.sh --force`: default
   Gate-1 runner (Node/pnpm; swap for your stack).
 - `bash .claude/scripts/cleanup-stale-block.sh <BLOCK_ID>`: delete
   local branches for a closed or abandoned block namespace.

@@ -834,7 +834,7 @@ def check_environment(root: pathlib.Path, block_id: str) -> list[Finding]:
 # ---------------------------------------- harness presence at base_sha
 #
 # SWAP-ME: REQUIRED_HARNESS_FILES below includes Node-stack entries
-# (`package.json`, `.claude/scripts/pnpm-locked-gate.sh`). Swap these
+# (`package.json`, `.claude/scripts/gate1.sh`). Swap these
 # for your stack's equivalents when you replace the Gate 1 runner.
 # The orchestrator-prompt / gate-agent / hook / rule entries are
 # stack-agnostic and stay. See docs/swap-points.md.
@@ -867,7 +867,7 @@ REQUIRED_HARNESS_FILES = (
     # the tree at base_sha for the gate chain to run. Replace with
     # your stack's equivalent file paths when you swap the runner.
     "scripts/quality-gate.py",
-    ".claude/scripts/pnpm-locked-gate.sh",
+    ".claude/scripts/gate1.sh",
     # Inner orchestrator
     ".claude/scripts/orchestrate-block.prompt.md",
     # Gates 2, 3a, 3b agents

@@ -86,7 +86,7 @@ patterns:
     hint: "Never bypass hooks; fix the underlying issue."
 
   - id: runtime-under-claude
-    regex: '\.claude/(gate[0-9a-b]*\.json|metrics\.json|gap-report\.json|phase-[^/]+\.json|gate1-raw/|blocks/|locks/|pnpm\.lock)'
+    regex: '\.claude/(gate[0-9a-b]*\.json|metrics\.json|gap-report\.json|phase-[^/]+\.json|gate1-raw/|blocks/|locks/|gate1\.lock)'
     severity: critical
     paths: ['**']
     exclude:

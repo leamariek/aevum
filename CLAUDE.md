@@ -42,7 +42,7 @@ implementations assume:
 - **Python 3.10+** for `scripts/*.py` (preflight, baseline,
   fix-loop budget, stale-verdict checks, gate runner).
 - **pnpm** for the default Gate 1 runner
-  (`.claude/scripts/pnpm-locked-gate.sh` plus
+  (`.claude/scripts/gate1.sh` plus
   `scripts/quality-gate.py`).
 - **bash** and **flock** for the wrapper and lock primitives.
 

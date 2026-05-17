@@ -178,7 +178,7 @@ small schema that every block actually fills in.
 
 The Aevum harness is stack-agnostic at the orchestration layer. The
 single stack-bound seam is the **Gate 1 runner**: Aevum ships a Node
-/ pnpm default (`pnpm-locked-gate.sh` + `quality-gate.py`) because
+/ pnpm default (`gate1.sh` + `quality-gate.py`) because
 that is the stack the author wrote it on; projects swap the runner
 for their language (cargo, ruff, golangci-lint, etc.) at adoption
 time. See `docs/swap-points.md` for the full seam list.

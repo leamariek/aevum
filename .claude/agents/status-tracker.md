@@ -38,7 +38,7 @@ separate codebase-metrics pipeline in Aevum core.
 
 ```bash
 # Re-run the Gate 1 chain (project's gate1 runner)
-bash .claude/scripts/pnpm-locked-gate.sh --force  # default Node runner; swap for your stack
+bash .claude/scripts/gate1.sh --force  # default Node runner; swap for your stack
 
 # Inspect recent commits
 git log --oneline -10

@@ -37,7 +37,7 @@ rename. You do not touch source files.
 1. **`logs/gates/gate1-delta.json`**. Build, lint, typecheck delta vs
    `main`. If missing, note it in your report and fall back to running
    the project's Gate-1 runner once (do not loop). The default runner
-   is `bash .claude/scripts/pnpm-locked-gate.sh --force`; the project
+   is `bash .claude/scripts/gate1.sh --force`; the project
    may swap this at the Gate-1 seam (see `docs/swap-points.md`).
 2. **`logs/gates/gate2.json`**. config-validator output. If
    `verdict: "pending"` (fragmentation signature), record it and treat

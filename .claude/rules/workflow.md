@@ -31,7 +31,7 @@ reference.
    `block/<BLOCK_ID>/<cluster_id>-<task_id>` worker branches.
 4. **Gate 1 (build, lint, typecheck, test)**: runs via the project's
    Gate-1 runner. Aevum's default runner is
-   `bash .claude/scripts/pnpm-locked-gate.sh --force` (Node/pnpm
+   `bash .claude/scripts/gate1.sh --force` (Node/pnpm
    example; swap for your stack at this single seam, see
    `docs/swap-points.md`). The runner serialises against concurrent
    invocations via flock and writes `logs/gates/gate1.json`.

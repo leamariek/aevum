@@ -68,7 +68,7 @@ if not shutil.which("pnpm"):
     sys.exit(
         "pnpm not on PATH; install pnpm (corepack enable + corepack prepare "
         "pnpm@latest --activate) or invoke via "
-        ".claude/scripts/pnpm-locked-gate.sh from a shell that has pnpm."
+        ".claude/scripts/gate1.sh from a shell that has pnpm."
     )
 
 # Default Node/pnpm checks. Add a `test` entry and any others your

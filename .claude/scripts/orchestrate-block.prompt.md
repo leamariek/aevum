@@ -224,10 +224,22 @@ Every event is one JSON line appended to
 `jq -c` for atomicity if available; otherwise write with `python3 -c`.
 
 ```json
-{"schema": 2, "ts": "<UTC ISO-8601 Z>", "block_id": "...",
- "cluster_id": "...|null", "task_id": "...|null", "event": "...",
- "git_sha": "<SHA>|null", "payload": {...}}
+{"schema":2,"ts":"<UTC ISO-8601 Z>","block_id":"...","cluster_id":"...|null","task_id":"...|null","event":"...","git_sha":"<SHA>|null","payload":{...}}
 ```
+
+**Format constraints** (load-bearing, post-hoc tooling depends on
+them):
+
+- One event per line, LF terminator.
+- Compact JSON, no whitespace between keys / values or in
+  separators. Python equivalent:
+  `json.dumps(d, separators=(',', ':'))`. jq: `jq -c`.
+- UTF-8.
+
+Pre-Round-3 ledgers may contain mixed-format lines (some with
+whitespace after `:` and `,`). Tooling that consumes existing
+ledgers should use a whitespace-tolerant regex; forward-going
+ledgers will be uniform.
 
 Emit exactly the events in Appendix A. Nothing else.
 
@@ -614,7 +626,8 @@ After every cluster closes:
 2. Dispatch `status-tracker` to refresh the project's status dashboard
    (the agent maintains its own target doc path).
 3. Emit `block_complete`.
-4. Print a visible block to the console:
+4. Emit `block_ready_for_signoff{integration_sha:"<SHA>"}`.
+5. Print a visible block to the console:
 
    ```
    BLOCK <BLOCK> READY FOR SIGN-OFF
@@ -627,10 +640,21 @@ After every cluster closes:
    To reject: write logs/blocks/<BLOCK>/signoff/REJECTED.md instead.
    ```
 
-5. Poll every 30 seconds for one of those two files. When one appears,
+6. Poll every 30 seconds for one of those two files. When one appears,
    emit `block_signed_off` or `block_rejected` and stop.
 
-6. Do not fast-forward onto `main`. That is a human action.
+7. If the poll has been running for more than ~25 minutes without
+   either signoff file appearing, emit
+   `block_close_poll_timeout{integration_sha:"<SHA>",waited_s:<n>}`
+   and exit cleanly. The wrapper picks up the inner exit and treats
+   the run as `block_finished` (block_complete is the last terminal
+   lifecycle event, which qualifies as clean closure). A later
+   operator-side `bash .claude/scripts/orchestrate-block-loop.sh
+   <BLOCK>` relaunch re-enters this section's polling from the
+   current integration tip. The timeout is informational, not an
+   abort: the block remains awaitable.
+
+8. Do not fast-forward onto `main`. That is a human action.
 
 ## 8. Rotation
 
@@ -670,10 +694,18 @@ detector excludes wrapper events when measuring inner liveness.
 
 Lifecycle:
 ```
-block_start  block_complete  block_signed_off  block_rejected
+block_start  block_complete  block_ready_for_signoff
+block_close_poll_timeout  block_signed_off  block_rejected
 block_abort  baseline_captured  baseline_refreshed
 resume_invariant_checked
 ```
+
+`block_ready_for_signoff{integration_sha}` fires immediately after
+`block_complete` so the ledger marks the transition into §7's
+sign-off poll. `block_close_poll_timeout{integration_sha,waited_s}`
+fires when the §7 poll exits without SIGNED.md/REJECTED.md; the
+block is still awaitable, the operator can relaunch to re-enter
+the poll from the same integration tip.
 
 Cluster:
 ```

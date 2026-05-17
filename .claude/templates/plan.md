@@ -5,7 +5,7 @@ created: 2026-04-16T00:00:00Z
 updated: 2026-04-16T00:00:00Z
 status: draft
 owner: <name-or-agent-id>
-phase: <P3 | P3.5 | P4 | ...>
+phase: <optional phase tag>
 # supersedes: <old-id>
 # superseded_by: <new-id>
 # tags: []

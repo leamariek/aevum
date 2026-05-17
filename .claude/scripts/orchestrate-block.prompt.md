@@ -294,6 +294,15 @@ loop catches the case where the inner is wedged and cannot reach §6.0;
 the two layers are complementary (upstream hardening, abort-signal
 plumbing).
 
+ABORT.md is the operator-initiated early-abort signal: use it when
+the operator wants to stop the run BEFORE the orchestrator would
+self-abort. The orchestrator self-aborts cleanly on runaway
+conditions without requiring operator action: see §6.8 fix-loop
+stall (`block_abort{reason:"fix_loop_stalled_no_signoff"}` after
+`cluster_fix_loop_stalled`). In stall scenarios the auto-abort
+often races ahead of an operator-written ABORT.md, which is the
+intended design: operator does not need to babysit a runaway loop.
+
 ### 6.1 Open
 
 1. Fetch `git rev-parse block/<BLOCK>/integration` → call that `BASE_SHA`.
@@ -345,7 +354,20 @@ For each return:
 - On return, verify `base_sha == expected_base_sha`. Mismatch →
   emit `base_drift_detected{task_id, expected, actual}` and re-dispatch
   against the true current integration tip after a resync.
-- Emit `task_returned{task_id, status, head_sha}`.
+- Emit `task_returned{task_id, status, head_sha, reason?}`. The
+  optional `reason` field carries a worker-side explanation when
+  `status != "ok"` or when the worker recognises a persistent
+  failure mode. Conventional reasons:
+  - `no_progress_possible`: worker has attempted the dispatch but
+    cannot satisfy the criterion (e.g., the acceptance demands a
+    file the worker's hard constraints forbid creating). Fix loop
+    still iterates per §6.8 but each iteration is cheaper because
+    the worker fails fast.
+  - `base_drift`: the worker observed cluster-tip drift mid-run
+    and refused to continue.
+  Custom reasons are allowed (the field is opaque to the
+  orchestrator's routing); use them to give fix-bucketer richer
+  context in the next iteration.
 
 If a task returns `failed`, keep the branch, record the failure, and
 continue to §6.4, the fix loop handles it alongside gate failures.
@@ -706,6 +728,26 @@ sign-off poll. `block_close_poll_timeout{integration_sha,waited_s}`
 fires when the §7 poll exits without SIGNED.md/REJECTED.md; the
 block is still awaitable, the operator can relaunch to re-enter
 the poll from the same integration tip.
+
+`block_abort{reason}` reason inventory (canonical, additive: any
+new reason a future section emits should land here):
+
+```
+block_id_unset              block_id_mismatch
+block_status_draft          block_status_closed
+baseline_missing            inconsistent_resume_state
+dirty_resume_worktree       stale_gate_verdict
+worker_head_mismatch        founder_abort_signal
+fix_loop_stalled_no_signoff fragmentation_storm
+gate1_fail:<explanation>    invented_verdict
+```
+
+Reasons followed by `:<...>` carry a sub-classifier (e.g.
+`gate1_fail:baseline_missing`, `gate1_fail:flock_timeout`).
+`fix_loop_stalled_no_signoff` is emitted automatically after
+`cluster_fix_loop_stalled` if no operator ABORT.md or
+CONTINUE.md signoff arrives within the orchestrator's
+self-shutdown window (§6.8).
 
 Cluster:
 ```

@@ -5,7 +5,7 @@ created: 2026-05-17T22:10:36Z
 updated: 2026-05-17T22:10:36Z
 status: draft
 owner: leamariek
-phase: <P3 | P3.5 | P4 | ...>
+phase: <optional phase tag>
 # supersedes: <old-id>
 # superseded_by: <new-id>
 # tags: []

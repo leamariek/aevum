@@ -24,7 +24,7 @@ worker branch, `main`, or anything else.
 This rule is enforced three ways:
 
 1. `.claude/settings.json` denies every `Bash(git push*)` variant at the
-   harness level — the tool call is rejected before it reaches the
+   harness level: the tool call is rejected before it reaches the
    shell.
 2. `.claude/rules/commit-policy.md` (this file) states the rule for
    humans and subagents that read rules but do not trigger the deny
@@ -37,7 +37,7 @@ waiting for a human to push is always lower than the cost of an unwanted
 push.
 
 The same principle applies to `git pull`, `git fetch`, and
-`git remote set-url` — also denied in `settings.json`. Agents work
+`git remote set-url`: also denied in `settings.json`. Agents work
 against the local state they already have; the founder synchronises
 with the remote.
 
@@ -79,11 +79,11 @@ Example commit subjects:
 
 ## Forbidden git flags and commands
 
-- `git push …` in any form — see §"Never push" above.
-- `git commit --amend` / `git commit -C` on shared history — pre-commit
+- `git push …` in any form: see §"Never push" above.
+- `git commit --amend` / `git commit -C` on shared history: pre-commit
   hook failure means the commit did **not** happen; fix, re-stage,
   create a **new** commit.
-- `git add -A` / `git add --all` / `git add .` — stage explicit paths.
+- `git add -A` / `git add --all` / `git add .`: stage explicit paths.
   No exceptions, including the orphan-autosave branch in
   `.claude/scripts/orchestrate-block.sh` (when wired). The autosave
   preserves uncommitted work on a doomed worker branch when a wedge is

@@ -73,7 +73,7 @@ If `iteration_index > 0`:
 
 ### 4. Root-cause hypothesis
 
-For each bucket, add a 1-2 sentence `root_cause_hypothesis` and a `suggested_approach` (also 1-2 sentences). These are LLM-authored but MUST be derived from the concrete error messages — no speculation without evidence from stderr.
+For each bucket, add a 1-2 sentence `root_cause_hypothesis` and a `suggested_approach` (also 1-2 sentences). These are LLM-authored but MUST be derived from the concrete error messages: no speculation without evidence from stderr.
 
 ### 5. affected_files
 

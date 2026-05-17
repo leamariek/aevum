@@ -51,8 +51,8 @@ For each pair of branches `(A, B)`:
      compiled artefacts, large 3D assets).
 
 For each group of branches that share files, propose:
-- `merge_strategy: per-file-merger` — for add-add, edit-edit, yaml-config, delete-edit.
-- `merge_strategy: sequential-trial` — for rename-edit, binary.
+- `merge_strategy: per-file-merger`: for add-add, edit-edit, yaml-config, delete-edit.
+- `merge_strategy: sequential-trial`: for rename-edit, binary.
 
 ## Output
 

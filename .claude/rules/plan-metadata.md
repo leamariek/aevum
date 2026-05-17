@@ -59,14 +59,14 @@ estimated_hours: 142
 ## Status transitions
 
 ```
-draft     → active           — plan is being executed against.
-draft     → archived         — abandoned before work started.
-active    → completed        — work done, plan frozen for history.
-active    → superseded       — replaced by a newer plan (set superseded_by).
-active    → archived         — abandoned mid-flight; add archive README.
-completed → superseded       — completed plan later replaced by a rework.
-completed → archived         — after 14-day grace, move to archive/plans/.
-superseded → archived        — after 7-day grace, move to archive/plans/.
+draft     → active          : plan is being executed against.
+draft     → archived        : abandoned before work started.
+active    → completed       : work done, plan frozen for history.
+active    → superseded      : replaced by a newer plan (set superseded_by).
+active    → archived        : abandoned mid-flight; add archive README.
+completed → superseded      : completed plan later replaced by a rework.
+completed → archived        : after 14-day grace, move to archive/plans/.
+superseded → archived       : after 7-day grace, move to archive/plans/.
 ```
 
 **Forbidden transitions** (hook rejects):
@@ -106,6 +106,6 @@ creating a new plan and fill in `id`, `title`, `created`, `updated`, and
   `status: active` files are untouched for more than 90 days.
 - **Exempt** from the hook: `_SESSION_TEMPLATE.md`, any `README.md`, and
   per-task execution prompts under `docs/plans/sessions/prompts/*-prompt.md`
-  (transcripts, not plans — canonical location is `logs/phase-N/*-prompt.md`).
+  (transcripts, not plans: canonical location is `logs/phase-N/*-prompt.md`).
 - **Review**: `fap-reviewer` verifies frontmatter at Gate 3b when a session
   touches a plan file.

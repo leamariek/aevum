@@ -97,7 +97,7 @@ For every criterion in every task:
    matched lines.
 3. Record:
    - `met: true` only if the evidence command yields the expected result.
-   - `met: false` with `evidence: "no testable evidence — criterion is not formally checkable"` if the criterion is vague (e.g. "code is clean"). **Loud failure** — vagueness is not passable.
+   - `met: false` with `evidence: "no testable evidence: criterion is not formally checkable"` if the criterion is vague (e.g. "code is clean"). **Loud failure**: vagueness is not passable.
    - `met: false` with the actual command output as `evidence` otherwise.
 
 ### Step 2: final write (atomic, replaces the stub)
@@ -130,7 +130,7 @@ unmet_task_ids=[...]
 ## Verdict rules
 
 - `verdict: pass` iff `criteria_unmet == 0`.
-- Every criterion's `evidence` field is non-empty — the orchestrator's downstream check `jq '.results[] | select(.evidence == "" or .evidence == null)' logs/gates/gate3a.json` MUST return nothing.
+- Every criterion's `evidence` field is non-empty: the orchestrator's downstream check `jq '.results[] | select(.evidence == "" or .evidence == null)' logs/gates/gate3a.json` MUST return nothing.
 
 ## Forbidden
 
@@ -140,4 +140,4 @@ unmet_task_ids=[...]
 - Running the project-level Gate 1 runner; that is Gate 1's job, not
   yours. You may invoke individual checks as evidence for a single
   criterion, but you do not run the full gate sequence.
-- Approving a criterion with no testable evidence — mark unmet with the documented failure string.
+- Approving a criterion with no testable evidence: mark unmet with the documented failure string.

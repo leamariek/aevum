@@ -34,11 +34,11 @@ active
 
 completed
   ├─→ superseded               (later rework replaces the finished plan)
-  └─  (terminal at docs/plans/) — the file MUST `git mv` to archive/plans/
+  └─  (terminal at docs/plans/): the file MUST `git mv` to archive/plans/
                                    in the same commit as the status flip
 
 superseded
-  └─  (terminal at docs/plans/) — same rule: move in the same commit
+  └─  (terminal at docs/plans/): same rule: move in the same commit
 
 archived
   └─  (terminal)               (never revive; create a new plan instead)
@@ -46,7 +46,7 @@ archived
 
 All other transitions are rejected by
 `.claude/hooks/plan-frontmatter.sh`. Reviving a terminal plan is forbidden
-because it erases the audit trail — if a completed plan's work needs
+because it erases the audit trail: if a completed plan's work needs
 redoing, open a new plan that `supersedes:` the original.
 
 ## Move-on-close rule
@@ -159,4 +159,4 @@ cheaper than rewriting history.
 
 Advisory cadence (`/hygiene` skill) continues to exist for the founder-
 initiated audits; it overlaps with the weekly scan and that is
-intentional — the weekly scan catches drift between founder audits.
+intentional: the weekly scan catches drift between founder audits.

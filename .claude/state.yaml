@@ -1,0 +1,11 @@
+# Aevum orchestrator state. Advisory snapshot; the authoritative event
+# log is per-block at logs/blocks/<BLOCK>/progress.jsonl.
+#
+# session-orchestrator and session-hygiene-warn.sh both expect this
+# file to exist. Populated as blocks open and close.
+schema: 1
+active_block: null
+wave: null
+blockers: []
+notes: |
+  Aevum orchestrator: no blocks active yet.

@@ -1,0 +1,51 @@
+# EXAMPLE: a minimal no-op smoke block for verifying the orchestrator
+# wiring on a fresh clone. The single task writes a marker file; the
+# gate chain runs against the trivial diff; the block closes.
+#
+# To use this as a real smoke:
+#   1. Update base_sha to a SHA in your repository that has the
+#      harness files present (run `git rev-parse HEAD` after committing
+#      the harness import).
+#   2. Set status to `active` and fill in activated_at + activated_by.
+#   3. Capture the baseline:
+#        bash scripts/capture-baseline.sh EXAMPLE
+#   4. Author a specialist agent at .claude/agents/no-op-worker.md
+#      (copy examples/agents/AGENT_TEMPLATE.md), or change the agent
+#      field below to a specialist that already exists.
+#   5. Dispatch:
+#        bash .claude/scripts/orchestrate-block-loop.sh EXAMPLE
+#   6. Sign off when the orchestrator prompts.
+#
+# This block exists for verifying the harness, not for production work.
+# Discard it (move to archive/blocks/) after the smoke passes.
+
+schema: 2
+
+id: EXAMPLE
+title: "no-op smoke"
+base_branch: main
+base_sha: <fill-in-after-importing-harness>
+
+status: draft
+activated_at: null
+activated_by: null
+
+kill_criteria: []
+
+clusters:
+  - id: cl-01-smoke
+    title: "no-op smoke"
+    depends_on: []
+    notes: "single-task cluster; the task is the serialising tail."
+    tasks:
+      - id: T01
+        agent: <specialist-slug>     # author one at .claude/agents/
+        parallel: false
+        title: "write a marker file"
+        files_touched_globs:
+          - "docs/blocks/EXAMPLE/marker.txt"
+        acceptance:
+          - "docs/blocks/EXAMPLE/marker.txt exists with content 'no-op smoke pass'."
+
+exit_criteria: []
+post_mortem_path: "docs/blocks/EXAMPLE/post-mortem.md"

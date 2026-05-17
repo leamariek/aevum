@@ -1,0 +1,80 @@
+# ----------------------------------------------------------------------------
+# Aevum block.yaml template
+# ----------------------------------------------------------------------------
+# A block is the unit of orchestrated work: a small set of related clusters
+# of parallel-safe tasks, dispatched by orchestrate-block.sh. What this
+# schema validates is the minimum the orchestrator needs to dispatch
+# safely: identity, base SHA, parallel-safety invariants, acceptance.
+#
+# Copy to docs/blocks/<BLOCK_ID>/block.yaml; fill in.
+#
+# Validate at draft time:
+#   python3 scripts/block-preflight.py <BLOCK_ID>
+# Exit 0 means clean. Exit 2 means at least one structural blocker.
+# ----------------------------------------------------------------------------
+
+schema: 2
+
+# Identity
+id: <BLOCK_ID>                  # short slug, e.g. B1, payments-refactor
+title: "<Human Title>"
+base_branch: main
+base_sha: <short-sha-at-block-open>
+
+# Lifecycle. Three states: draft, active, closed. Preflight refuses to
+# dispatch unless status == active.
+status: draft
+activated_at: null              # set at activation, UTC ISO 8601
+activated_by: null              # set at activation, founder name
+
+# Kill criteria (optional; recommended for blocks with a wall-clock cap).
+# Each entry is specific, observable, and tied to measurable state.
+# Example:
+#   - "if the staging smoke fails by 13:30 PT, drop Layer 2 work and
+#      finish Layer 1 close-out only."
+kill_criteria: []
+
+# Clusters and tasks. Two preflight invariants:
+#   1. Each cluster MUST declare at least one task with parallel: false
+#      (the serialising tail). Convention: the last task by id.
+#   2. Two parallel tasks in the same cluster MUST NOT list the same
+#      literal path in files_touched_globs.
+clusters:
+
+  - id: cl-01-<slug>
+    title: "<cluster description>"
+    depends_on: []              # other cluster ids this cluster waits for
+    notes: ""
+    tasks:
+
+      - id: T01
+        agent: <specialist-slug>  # slug of an agent file under
+                                  # .claude/agents/. The orchestrator
+                                  # has no fixed list; whatever the
+                                  # project registers is dispatchable.
+        parallel: true          # true if this task can run alongside
+                                # siblings in the same cluster
+        title: "<task title>"
+        files_touched_globs:
+          - "<glob 1>"
+          - "<glob 2>"
+        acceptance:
+          - "<specific, verifiable acceptance criterion>"
+
+      # T0N is the serialising tail (parallel: false). Required: at
+      # least one per cluster. Convention: last task by id; owns cluster
+      # close-out work (re-exports, shared config, index files).
+      - id: T0N
+        agent: <specialist-slug>
+        parallel: false
+        title: "<close-out task>"
+        files_touched_globs:
+          - "<glob>"
+        acceptance:
+          - "<close-out criterion>"
+
+# Optional block-level exit criteria
+exit_criteria: []
+
+# Optional post-mortem path (becomes required at close)
+post_mortem_path: "docs/blocks/<BLOCK_ID>/post-mortem.md"

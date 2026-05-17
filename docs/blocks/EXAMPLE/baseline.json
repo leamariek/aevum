@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "block_id": "EXAMPLE",
+  "captured_at": "<fill-in-when-baseline-captured>",
+  "raw_dir": "logs/gates/raw/<UTC-no-colons>",
+  "error_count": 0,
+  "errors": []
+}

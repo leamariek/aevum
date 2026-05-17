@@ -604,7 +604,13 @@ Emit `cluster_complete{merged_sha}`.
 
 After every cluster closes:
 
-1. Final full gate chain on `block/<BLOCK>/integration` (gates 1 + 2 + 3).
+1. Final full gate chain on `block/<BLOCK>/integration`: gates 1,
+   2, 3a, and 3b in sequence. Gate 3a re-runs at block-close (in
+   addition to its cluster-phase run) so the multi-cluster case
+   where one cluster's worker silently invalidates an earlier
+   cluster's acceptance criterion is caught here, not after sign-off.
+   Cluster gate3a only sees its own worker diff; block-close gate3a
+   sees the integration tip.
 2. Dispatch `status-tracker` to refresh the project's status dashboard
    (the agent maintains its own target doc path).
 3. Emit `block_complete`.

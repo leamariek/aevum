@@ -348,7 +348,8 @@ The Agent tool's contract for `isolation: "worktree"`:
     local repo after the worktree is removed; worktrees and branches
     have independent lifecycles.
 
-For every parallel-task return carrying a worktree path, immediately:
+For every Agent dispatch that used `isolation: "worktree"` and
+returned a worktree path, immediately:
 
 1. Verify the branch is `block/<BLOCK>/<cluster_id>-<task_id>` and the
    reported HEAD SHA matches the subagent's `head_sha` in its JSON
@@ -357,6 +358,12 @@ For every parallel-task return carrying a worktree path, immediately:
 2. Run `git worktree remove --force <path>` via Bash. Emit
    `worker_worktree_released{task_id, path}`.
 3. Record the task's branch and head SHA for §6.4 merge.
+
+The trigger is "a worktree was created and the dispatch returned a
+path", not "the task was parallel". A solo `parallel: false` task
+dispatched with `isolation: "worktree"` follows the same cleanup
+contract; the §6.3 serialising-tail dispatch is included by the same
+rule.
 
 If step 2 fails (path missing, permission error), emit
 `worker_worktree_release_failed{task_id, path, stderr}` and continue.
@@ -373,6 +380,11 @@ After every parallel task has returned, check out the cluster branch,
 rebase each parallel task branch onto it in task-id order, then dispatch
 the single `parallel: false` task with the cluster branch tip as its
 `BASE`. Its one job is to reconcile re-exports and shared files.
+
+The serialising-tail dispatch may use `isolation: "worktree"` or
+not; both are valid. If it does, the §6.2b post-return bookkeeping
+and worktree-cleanup contract applies to its return just as it does
+to a parallel sibling.
 
 ### 6.4 Merge parallel task branches into the cluster branch
 

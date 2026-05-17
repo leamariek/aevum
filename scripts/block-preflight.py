@@ -584,22 +584,6 @@ def run_state_audit(
 # checks so the operator sees setup errors before the block-specific
 # findings.
 
-def _probe_pnpm(root: pathlib.Path) -> list[Finding]:
-    which = shutil.which("pnpm")
-    local = root / "node_modules" / ".bin" / "pnpm"
-    if which:
-        return [Finding("info", "env:pnpm", f"pnpm resolved at {which}")]
-    if local.exists():
-        return [Finding(
-            "info", "env:pnpm", f"pnpm resolved at {local}",
-        )]
-    return [Finding(
-        "blocker", "env:pnpm",
-        "pnpm binary not found on PATH and not at "
-        "node_modules/.bin/pnpm -- enable corepack and run `pnpm install`",
-    )]
-
-
 def _probe_claude_cli() -> list[Finding]:
     which = shutil.which("claude")
     if which:
@@ -814,15 +798,25 @@ def _probe_node_modules(root: pathlib.Path) -> list[Finding]:
 
 
 def _probe_pnpm_conditional(root: pathlib.Path) -> list[Finding]:
-    # The base _probe_pnpm always fires; this wrapper only fires when
-    # the project actually uses pnpm (signalled by package.json plus
-    # the default pnpm-locked-gate.sh runner). Aevum core ships the
-    # runner but no package.json, so the original probe would block
-    # on a fresh clone with no project layered on. The wrapper makes
-    # the check conditional.
+    # Only fires when the project actually uses pnpm (signalled by a
+    # package.json at the repo root). Aevum core ships the default
+    # pnpm Gate-1 runner but no package.json, so an unconditional pnpm
+    # probe would block on a fresh clone with no project layered on.
     if not (root / "package.json").exists():
         return []
-    return _probe_pnpm(root)
+    which = shutil.which("pnpm")
+    local = root / "node_modules" / ".bin" / "pnpm"
+    if which:
+        return [Finding("info", "env:pnpm", f"pnpm resolved at {which}")]
+    if local.exists():
+        return [Finding(
+            "info", "env:pnpm", f"pnpm resolved at {local}",
+        )]
+    return [Finding(
+        "blocker", "env:pnpm",
+        "pnpm binary not found on PATH and not at "
+        "node_modules/.bin/pnpm -- enable corepack and run `pnpm install`",
+    )]
 
 
 def check_environment(root: pathlib.Path, block_id: str) -> list[Finding]:
@@ -907,6 +901,52 @@ def check_harness_presence(
         f"cannot run against this base. Update block.yaml:base_sha to a "
         f"commit where the harness is in tree.",
         {"missing": missing, "base_sha": base_sha},
+    )]
+
+
+# ----------------------------------------- baseline.json at base_sha
+#
+# The cluster branch is forked from base_sha. Gate 1's baseline-diff.py
+# resolves docs/blocks/<BLOCK>/baseline.json through the cluster tree,
+# not the host repo's working tree. If base_sha predates the commit
+# that committed baseline.json, Gate 1 fails with
+# verdict=fail, reason=baseline_missing AFTER worker dispatch and
+# cluster merge -- minutes of worker time burnt before the operator
+# learns about a setup-order defect.
+#
+# This check forecloses that failure mode at preflight time. It uses
+# the existing tree_files list (already loaded for harness-presence)
+# rather than a second git ls-tree call. Same severity contract as
+# check_harness_presence: blocker, with an actionable remediation
+# message that names the activation-commit pattern.
+
+def check_baseline_present(
+    root: pathlib.Path,
+    block_id: str,
+    base_sha: str,
+) -> list[Finding]:
+    relpath = f"docs/blocks/{block_id}/baseline.json"
+    try:
+        out = _git(
+            "ls-tree", "-r", "--name-only", base_sha, "--", relpath,
+        )
+    except RuntimeError as e:
+        return [Finding(
+            "blocker", "baseline",
+            f"baseline.json presence check failed at base_sha "
+            f"{base_sha[:7]}: {e}",
+            {"path": relpath, "base_sha": base_sha},
+        )]
+    if relpath in {line for line in out.splitlines() if line}:
+        return []
+    return [Finding(
+        "blocker", "baseline",
+        f"base_sha {base_sha[:7]} tree is missing "
+        f"{relpath}; Gate 1 will abort with baseline_missing. Run "
+        f"`bash scripts/capture-baseline.sh {block_id}` then commit "
+        f"baseline.json + block.yaml; ensure block.yaml's base_sha "
+        f"references a commit whose tree contains baseline.json.",
+        {"path": relpath, "base_sha": base_sha},
     )]
 
 
@@ -1073,6 +1113,7 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover
             f"'{base_branch}'; block is branching from an unmerged commit",
         ))
     findings.extend(check_harness_presence(tree_files, base_sha))
+    findings.extend(check_baseline_present(ROOT, args.block_id, base_sha))
 
     blockers, parse_note = load_state_blockers()
     if parse_note is not None:

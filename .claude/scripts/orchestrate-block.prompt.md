@@ -183,7 +183,7 @@ gate1:  delta_zero | delta_regression | fail
 gate2:  pass | fail
 gate3a: pass | fail
 gate3:  APPROVED | CHANGES_REQUESTED
-block:  active | moat_demonstrated | signed_off | aborted
+block:  active | complete | signed_off | aborted
 ```
 
 ## 3. block.yaml schema
@@ -607,7 +607,7 @@ After every cluster closes:
 1. Final full gate chain on `block/<BLOCK>/integration` (gates 1 + 2 + 3).
 2. Dispatch `status-tracker` to refresh the project's status dashboard
    (the agent maintains its own target doc path).
-3. Emit `block_moat_demonstrated`.
+3. Emit `block_complete`.
 4. Print a visible block to the console:
 
    ```
@@ -664,7 +664,7 @@ detector excludes wrapper events when measuring inner liveness.
 
 Lifecycle:
 ```
-block_start  block_moat_demonstrated  block_signed_off  block_rejected
+block_start  block_complete  block_signed_off  block_rejected
 block_abort  baseline_captured  baseline_refreshed
 resume_invariant_checked
 ```

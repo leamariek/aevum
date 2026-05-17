@@ -216,7 +216,7 @@ plan (block.yaml) → preflight → dispatch → cluster loop:
   → Gate 1 → Gate 2 → Gate 3a → Gate 3b → fix loop if any fail
   → close into integration branch
 → block close: replay full gate chain on integration tip
-→ block_moat_demonstrated event
+→ block_complete event
 → founder sign-off ceremony (SIGNED.md or REJECTED.md)
 → block_signed_off event
 ```

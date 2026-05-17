@@ -88,7 +88,7 @@ wrapper emits goes here. The ledger is the source of truth for:
   `head_sha_at_emit` field; if the cluster branch tip has advanced
   past that SHA without consuming the verdict, the verdict is stale
   and the operator must re-run the gate).
-- Block close ceremony (`block_moat_demonstrated` followed by a
+- Block close ceremony (`block_complete` followed by a
   founder-written `signoff/SIGNED.md` or `signoff/REJECTED.md`).
 - Audit (every decision the orchestrator made, in order, with
   timestamps and SHAs).

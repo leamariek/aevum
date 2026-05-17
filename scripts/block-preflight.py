@@ -99,13 +99,13 @@ GLOB_META = set("*?[]")
 # set because a wedged closure is not a clean closure and re-runs
 # must still be refused.
 PROGRESS_TERMINAL_EVENTS = frozenset({
-    "block_moat_demonstrated",
+    "block_complete",
     "block_signed_off",
     "block_rejected",
     "wrapper_wedge_detected",
 })
 PROGRESS_CLEAN_CLOSURE_EVENTS = frozenset({
-    "block_moat_demonstrated",
+    "block_complete",
     "block_signed_off",
 })
 
@@ -221,7 +221,7 @@ def _block_closed_cleanly(root: pathlib.Path, block_id: str) -> bool:
       2. logs/blocks/<id>/progress.jsonl exists, parses, and contains
          at least one event in PROGRESS_TERMINAL_EVENTS.
       3. The last event in PROGRESS_TERMINAL_EVENTS is a clean-closure
-         event (block_moat_demonstrated or block_signed_off).
+         event (block_complete or block_signed_off).
 
     block_abort is excluded from PROGRESS_TERMINAL_EVENTS so a
     re-launch attempt against an already-closed block (which itself
@@ -293,9 +293,9 @@ def check_block_structure(
     elif status == "closed":
         # Post-close-hygiene exception: when the block closed cleanly
         # (SIGNED.md present and last lifecycle terminal in
-        # progress.jsonl is block_moat_demonstrated or
+        # progress.jsonl is block_complete or
         # block_signed_off) the closed-status finding demotes to
-        # info. This supports the legitimate moat-proof re-run
+        # info. This supports the legitimate post-close re-run
         # pattern (e.g., re-running a closed block against an
         # external dependency that finally landed) without training
         # operators to reach for --report-only as the bypass.

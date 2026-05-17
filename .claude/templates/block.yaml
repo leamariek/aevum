@@ -6,7 +6,10 @@
 # schema validates is the minimum the orchestrator needs to dispatch
 # safely: identity, base SHA, parallel-safety invariants, acceptance.
 #
-# Copy to docs/blocks/<BLOCK_ID>/block.yaml; fill in.
+# Do not hand-copy. Use the scaffolder, which creates this block.yaml
+# AND the paired narrative plan under docs/plans/ in one step (see
+# .claude/rules/block-discipline.md "Block creation: paired artefacts"):
+#   bash scripts/new-block.sh <BLOCK_ID> "<Title>" <owner>
 #
 # Validate at draft time:
 #   python3 scripts/block-preflight.py <BLOCK_ID>

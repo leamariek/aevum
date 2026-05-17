@@ -1,10 +1,10 @@
 ---
-id: <kebab-case-slug>
-title: <Short Human Title>
-created: 2026-04-16T00:00:00Z
-updated: 2026-04-16T00:00:00Z
+id: block-example
+title: Minimal no-op smoke
+created: 2026-05-17T22:10:36Z
+updated: 2026-05-17T22:10:36Z
 status: draft
-owner: <name-or-agent-id>
+owner: leamariek
 phase: <P3 | P3.5 | P4 | ...>
 # supersedes: <old-id>
 # superseded_by: <new-id>
@@ -12,7 +12,7 @@ phase: <P3 | P3.5 | P4 | ...>
 # estimated_hours: 0
 ---
 
-# <Plan Title>
+# Minimal no-op smoke
 
 > Replace the frontmatter fields above (especially `id`, `title`, `created`,
 > `updated`, `owner`, `phase`) before the first commit. See
@@ -61,3 +61,13 @@ criteria.
 
 Items explicitly punted, with a link to the follow-up plan or a backlog
 entry.
+
+## Block reference
+
+This plan pairs with the orchestrator block at
+`docs/blocks/EXAMPLE/block.yaml`. The block is the
+orchestrator-executable structured plan; this document is the
+narrative one (context, reasoning, acceptance rationale, post-mortem).
+
+- Block ID: `EXAMPLE`
+- Created: 2026-05-17T22:10:36Z

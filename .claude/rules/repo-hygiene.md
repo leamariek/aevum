@@ -59,6 +59,7 @@ The Aevum harness itself owns:
 | `.claude/state.yaml` | Advisory project-state snapshot. |
 | `scripts/` | Repo-wide helper scripts (preflight, baseline, gate runners). |
 | `docs/blocks/` | Per-block plan and fixture artefacts (`block.yaml`, `baseline.json`). |
+| `docs/plans/` | Narrative plans, including the paired narrative plan for every block (see `block-discipline.md`). |
 | `logs/` | Run logs and runtime artefacts. Append-only. See `runtime-vs-config.md`. |
 
 The project consuming Aevum owns the rest:

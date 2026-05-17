@@ -52,6 +52,8 @@
       "Bash(.claude/scripts/orchestrate-block-loop.sh*)",
       "Bash(bash scripts/capture-baseline.sh*)",
       "Bash(scripts/capture-baseline.sh*)",
+      "Bash(bash scripts/new-block.sh*)",
+      "Bash(scripts/new-block.sh*)",
       "Bash(python3 scripts/block-preflight.py*)",
       "Bash(python3 scripts/check-stale-gate-verdicts.py*)",
       "Bash(python3 scripts/check-fix-loop-budget.py*)",

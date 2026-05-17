@@ -63,6 +63,12 @@ Swap the Gate 1 stack for your language at the seam documented in
 - Plans under `docs/plans/` carry YAML frontmatter
   (`.claude/rules/plan-metadata.md`); closed plans move to
   `archive/plans/` immediately (`.claude/rules/doc-lifecycle.md`).
+- **Every block pairs with a narrative plan.** Use
+  `bash scripts/new-block.sh <BLOCK_ID> "<Title>" <owner>` to
+  scaffold both `docs/blocks/<BLOCK_ID>/block.yaml` (structured,
+  orchestrator-executable) and
+  `docs/plans/<YYYY-MM-DD>_block-<BLOCK_ID>.md` (narrative, human
+  reasoning). The two artefacts are sibling outputs; both ship.
 
 ## Specialist agents
 

@@ -41,6 +41,34 @@ kill_criteria:
 A `block.yaml` without `kill_criteria` is accepted by preflight;
 including them is encouraged for blocks with a wall-clock cap.
 
+## Block creation: paired artefacts
+
+Every block ships with two artefacts, created together:
+
+1. `docs/blocks/<BLOCK_ID>/block.yaml`: the structured,
+   orchestrator-executable plan (clusters, tasks, acceptance
+   criteria).
+2. `docs/plans/<YYYY-MM-DD>_block-<BLOCK_ID>.md`: the narrative
+   plan (context, goals, reasoning, risks, post-mortem).
+
+The canonical entry point is:
+
+```bash
+bash scripts/new-block.sh <BLOCK_ID> "<Title>" <owner>
+```
+
+It scaffolds both files from `.claude/templates/block.yaml` and
+`.claude/templates/plan.md`, fills in identity and frontmatter
+fields, and prints the next-step ladder (edit, activate, capture
+baseline, preflight, dispatch).
+
+For a legacy block that ships without a paired plan, back-fill
+with `--plan-only`:
+
+```bash
+bash scripts/new-block.sh --plan-only <BLOCK_ID> "<Title>" <owner>
+```
+
 ## Draft-time validation
 
 Before flipping `status: draft` to `status: active`:

@@ -116,14 +116,14 @@ Rules, non-negotiable:
       roll-up and is unsafe for this check.
 
       Cross-block tolerance matters because diagnostic tools
-      (running preflight on a closed block during a /hygiene
+      (running preflight on a closed block during a hygiene
       audit, regenerating an old block's preflight.json for
       comparison) legitimately drift those files without affecting
-      the active block. F3 rotation 2 aborted on
-      2026-04-27T16:50:41Z under the previous current-block-only
-      whitelist because a /hygiene-era preflight test on F5a had
-      left `logs/blocks/F5a/preflight.json` modified, even though
-      F5a is closed and the modification was harmless to F3. The
+      the active block. Upstream production hit this: a resume of
+      an active block falsely aborted because a diagnostic
+      preflight on an unrelated closed block had left that closed
+      block's preflight.json modified, even though the
+      modification was harmless to the active block. The
       any-block whitelist eliminates that class of false abort
       permanently.
 
@@ -190,7 +190,7 @@ block:  active | moat_demonstrated | signed_off | aborted
 
 ```yaml
 schema: 1
-id: F1                         # must equal $BLOCK_ID
+id: B1                         # must equal $BLOCK_ID
 title: "one line"
 base_branch: main              # parent of the block's integration branch
 base_sha: a48d02c              # integration branch starts here
@@ -448,8 +448,7 @@ Route on the verdict:
 ### 6.6a Gate 3a, acceptance criteria
 
 Dispatch the existing `criteria-checker` agent with a **block-mode
-envelope** that passes acceptance criteria inline rather than via
-phase-era prompt files. Envelope shape:
+envelope** that passes acceptance criteria inline. Envelope shape:
 
 ```
 MODE: block
@@ -572,9 +571,8 @@ Storm alarm. If the budget script's output has `storm_alarm: true`
 recovery_count:<M>}` and stop. The fragmentation workaround has itself
 become the failure mode; redispatching another recovery would just
 defer the diagnosis. Recovery is operator-driven: rebasing on a
-hardened wrapper, switching gate agents to fresh-process isolation
-(§10.1 option 3, queued as a separate plan with ADR), or accepting
-the abort and re-launching after diagnosis.
+hardened wrapper, switching gate agents to fresh-process isolation,
+or accepting the abort and re-launching after diagnosis.
 
 No hard cap on substantive iterations. Philosophy is: a stuck block
 asks for help, it does not flag itself as hopeless.
@@ -628,7 +626,7 @@ exits code 4, then re-spawns and you resume from the ledger tail.
 - Never push. Any variant of `git push` is rejected by the harness anyway.
 - Never pass the hook-bypass flag, never pass `--amend`, never stage with
   `-A` or `--all`, never `reset --hard`, never `checkout --orphan`.
-- Never write to `.claude/state.yaml` or `.claude/state.phase-era.yaml`.
+- Never write to `.claude/state.yaml`.
 - Never edit `docs/blocks/<BLOCK>/baseline.json`, baselines refresh only
   via `scripts/capture-baseline.sh` on an explicit debt-paydown commit.
 - Never write to files outside this block's branch scope and its

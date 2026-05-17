@@ -1,3 +1,12 @@
+---
+id: fix-discipline
+title: Fix Discipline
+created: 2026-05-15T00:00:00Z
+updated: 2026-05-17T00:00:00Z
+status: active
+owner: founder
+---
+
 # Fix Discipline
 
 A change must solve a problem at its source. Painting over the symptom

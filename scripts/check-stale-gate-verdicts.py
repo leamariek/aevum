@@ -138,7 +138,7 @@ def evaluate(events: list[dict], block_id: str) -> dict:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--block", required=True, help="block ID (e.g. F1)")
+    parser.add_argument("--block", required=True, help="block ID (e.g. B1)")
     parser.add_argument(
         "--ledger",
         default=None,

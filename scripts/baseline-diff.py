@@ -232,7 +232,7 @@ def diff(block_id: str, raw_dir: pathlib.Path) -> int:
 
 def main() -> int:
     p = argparse.ArgumentParser(description="Gate-1 baseline capture and delta diff.")
-    p.add_argument("--block", required=True, help="block id, e.g. F1")
+    p.add_argument("--block", required=True, help="block id, e.g. B1")
     p.add_argument("--mode", choices=["capture", "diff"], required=True)
     p.add_argument("--raw-dir", help="override the gates/raw subdir (defaults to latest)")
     args = p.parse_args()

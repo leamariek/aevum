@@ -2,8 +2,15 @@
 name: merge-analyser
 description: Pre-merge static analysis of session task branches. Identifies files touched by ≥2 branches and proposes per-file merge strategies. No git writes.
 model: opus
-tools: Read, Bash, Grep, Glob
-disallowedTools: [Edit, Write, NotebookEdit]
+tools:
+  - Read
+  - Bash
+  - Grep
+  - Glob
+disallowedTools:
+  - Edit
+  - Write
+  - NotebookEdit
 maxTurns: 30
 ---
 

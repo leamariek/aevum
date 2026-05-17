@@ -15,9 +15,9 @@ the gates go green. Two iteration kinds need to be counted separately:
   because they reflect Anthropic-side flakiness, not block-side
   problems; counting them against the substantive budget would have
   every fragmentation storm exhaust the founder's pause-trigger
-  before the actual block work has had a chance to land. F4 burned
-  3 of its 5 fix iterations on fragmentation alone (per
-  ``_ORCHESTRATOR_ANALYSIS.md`` §10.1).
+  before the actual block work has had a chance to land. Upstream
+  production hit this: a single cluster burned 3 of its 5 fix
+  iterations on fragmentation alone.
 
 This helper reads the per-block ledger, scopes counting to the most
 recent ``cluster_start{cluster_id: <CLUSTER>}`` event for the named
@@ -126,7 +126,7 @@ def evaluate(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--block", required=True, help="block ID (e.g. F1)")
+    parser.add_argument("--block", required=True, help="block ID (e.g. B1)")
     parser.add_argument(
         "--cluster", required=True, help="cluster ID (e.g. cl-01)",
     )

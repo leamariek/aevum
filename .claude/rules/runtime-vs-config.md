@@ -1,3 +1,12 @@
+---
+id: runtime-vs-config
+title: Runtime vs. Config
+created: 2026-05-15T00:00:00Z
+updated: 2026-05-17T00:00:00Z
+status: active
+owner: founder
+---
+
 # Runtime vs. Config
 
 `.claude/` holds **committed configuration only**. Runtime artefacts

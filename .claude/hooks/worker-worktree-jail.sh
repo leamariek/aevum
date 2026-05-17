@@ -4,13 +4,15 @@
 # worktree is a *linked* one (i.e., a worker subagent's worktree
 # distinct from the main project worktree).
 #
-# F2 surfaced three worker-isolation leakage events under
-# .claude/worktrees/agent-* (post-mortem carryover #1):
+# Upstream production runs surfaced three worker-isolation leakage
+# patterns under .claude/worktrees/agent-*:
 #
-#   - cl-02 T01 wrote partial work into the main worktree.
-#   - cl-03 T01 had its cwd reset mid-task and wrote outside its
+#   - A parallel-task worker wrote partial work into the main worktree
+#     (cwd default-of-cwd inheritance bug).
+#   - A worker had its cwd reset mid-task and wrote outside its
 #     assigned worktree.
-#   - cl-03 T04's worktree was wiped by a WSL filesystem hiccup.
+#   - A worker's worktree was wiped by a filesystem hiccup (WSL2,
+#     network volume eviction, etc.).
 #
 # This hook addresses the first two by enforcing the boundary at
 # PreToolUse so the write never lands. The third (worktree wipe) is

@@ -2,8 +2,15 @@
 name: criteria-checker
 description: Verifies each acceptance criterion of a session's tasks against the diff and runtime evidence (test command outputs, regex matches in produced files). Writes gate3a.json.
 model: sonnet
-tools: Read, Bash, Grep, Glob
-disallowedTools: [Edit, Write, NotebookEdit]
+tools:
+  - Read
+  - Bash
+  - Grep
+  - Glob
+disallowedTools:
+  - Edit
+  - Write
+  - NotebookEdit
 maxTurns: 40
 ---
 
@@ -35,7 +42,7 @@ reading the envelope header.
 
 ### Step 0: stub-write FIRST (mandatory)
 
-Before any other tool call, before any reasoning narrative, your **first** action is a single `Bash` call that atomically writes a stub `logs/gates/gate3a.json` with `verdict: "pending"`. Reason: F2 surfaced five fragmentation events where this agent (and its sibling `config-validator`) terminated mid-run with no gate JSON on disk (post-mortem carryover #2). Stub-first means a fragmented run still produces an observable artefact; the orchestrator detects `verdict: "pending"` and falls back deterministically rather than guessing.
+Before any other tool call, before any reasoning narrative, your **first** action is a single `Bash` call that atomically writes a stub `logs/gates/gate3a.json` with `verdict: "pending"`. Reason: upstream production runs surfaced fragmentation events where this agent (and its sibling `config-validator`) terminated mid-run with no gate JSON on disk. Stub-first means a fragmented run still produces an observable artefact; the orchestrator detects `verdict: "pending"` and falls back deterministically rather than guessing.
 
 Use this exact shape (atomic via tempfile + rename):
 

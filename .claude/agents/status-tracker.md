@@ -2,7 +2,13 @@
 name: status-tracker
 description: Keeps all status and tracking files up-to-date. Measures codebase metrics, checks build health, updates task statuses, and generates progress reports. Run after every session merge.
 model: sonnet
-tools: Read, Write, Edit, Bash, Grep, Glob
+tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
 maxTurns: 20
 ---
 

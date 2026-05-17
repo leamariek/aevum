@@ -208,13 +208,13 @@ def _is_literal(path: str) -> bool:
 def _block_closed_cleanly(root: pathlib.Path, block_id: str) -> bool:
     """True iff the block was signed off after a clean orchestrator close.
 
-    The post-close-hygiene rule: an operator legitimately re-runs the
-    moat-proof harness against a closed block when downstream
-    preconditions clear (e.g., F4 carryover #6 substrate-onboarding
-    completing post-close). The closed-status finding stays a blocker
-    for wedged or in-flight closures, but demotes to info when both
-    SIGNED.md is present and progress.jsonl's last lifecycle terminal
-    event is a clean closure.
+    The post-close-hygiene rule: an operator legitimately re-runs
+    the gate chain against a closed block when downstream
+    preconditions clear (e.g. an external dependency that was
+    blocking finally lands post-close). The closed-status finding
+    stays a blocker for wedged or in-flight closures, but demotes to
+    info when both SIGNED.md is present and progress.jsonl's last
+    lifecycle terminal event is a clean closure.
 
     Three conditions, all required:
       1. logs/blocks/<id>/signoff/SIGNED.md exists.
@@ -278,21 +278,17 @@ def check_block_structure(
     # block_abort{reason: "block_status_draft"}, but surfacing it at
     # preflight time gives the operator a single failure path with
     # all activation work to do, rather than discovering it after a
-    # successful preflight + spawned inner-claude. F3 hit this
-    # 2026-04-27 (block.yaml status: draft was preflight-clean but
-    # the orchestrator aborted on first dispatch; required a
-    # follow-up activation commit before the next launch).
+    # successful preflight + spawned inner-claude.
     status = block.get("status")
     if status == "draft":
         findings.append(Finding(
             "blocker", "block",
-            "block.yaml status is 'draft'; must be 'active' before launch. "
-            "Activation pattern (F2 / ADR-0011 precedent): single commit "
-            "that flips status: draft -> active, populates activated_at + "
-            "activated_by, refreshes base_sha to current main tip, and "
-            "flips the block's draft ADRs from proposed -> accepted. See "
-            "docs/blocks/F5a/block.yaml for the activated reference shape "
-            "and docs/block-model.md §Lifecycle for the prose.",
+            "block.yaml status is 'draft'; must be 'active' before "
+            "launch. Activation pattern: a single commit that flips "
+            "status: draft -> active, populates activated_at + "
+            "activated_by, refreshes base_sha to current main tip, "
+            "and flips any draft ADRs the block depends on from "
+            "proposed -> accepted.",
         ))
     elif status == "closed":
         # Post-close-hygiene exception: when the block closed cleanly
@@ -300,12 +296,12 @@ def check_block_structure(
         # progress.jsonl is block_moat_demonstrated or
         # block_signed_off) the closed-status finding demotes to
         # info. This supports the legitimate moat-proof re-run
-        # pattern (e.g., re-running F4 against tenant-alpha after
-        # substrate-onboarding completes per F4 post-mortem
-        # carryover #6) without training operators to reach for
-        # --report-only as the bypass. Wedged or in-flight closures
-        # must still refuse re-launch, so the helper returns False
-        # for those and the original blocker stays.
+        # pattern (e.g., re-running a closed block against an
+        # external dependency that finally landed) without training
+        # operators to reach for --report-only as the bypass.
+        # Wedged or in-flight closures must still refuse re-launch,
+        # so the helper returns False for those and the original
+        # blocker stays.
         clean_close = (
             root is not None
             and block_id is not None
@@ -314,10 +310,10 @@ def check_block_structure(
         severity = "info" if clean_close else "blocker"
         findings.append(Finding(
             severity, "block",
-            "block.yaml status is 'closed'; the block cannot be relaunched. "
-            "Closed blocks are immutable per docs/block-model.md §Lifecycle. "
-            "If new work belongs to this scope, open a successor block "
-            "(e.g. F5b after F5a) with its own block.yaml.",
+            "block.yaml status is 'closed'; the block cannot be "
+            "relaunched. Closed blocks are immutable by design. "
+            "If new work belongs to this scope, open a successor "
+            "block with its own block.yaml.",
         ))
     elif status != "active":
         findings.append(Finding(
@@ -803,6 +799,11 @@ def _probe_memory(
 
 
 def _probe_node_modules(root: pathlib.Path) -> list[Finding]:
+    # Only fire when the project actually uses Node (signalled by a
+    # package.json at the repo root). Aevum core ships no package.json;
+    # non-Node consumers would see a spurious warning otherwise.
+    if not (root / "package.json").exists():
+        return []
     nm = root / "node_modules"
     if nm.exists():
         return []
@@ -812,9 +813,21 @@ def _probe_node_modules(root: pathlib.Path) -> list[Finding]:
     )]
 
 
+def _probe_pnpm_conditional(root: pathlib.Path) -> list[Finding]:
+    # The base _probe_pnpm always fires; this wrapper only fires when
+    # the project actually uses pnpm (signalled by package.json plus
+    # the default pnpm-locked-gate.sh runner). Aevum core ships the
+    # runner but no package.json, so the original probe would block
+    # on a fresh clone with no project layered on. The wrapper makes
+    # the check conditional.
+    if not (root / "package.json").exists():
+        return []
+    return _probe_pnpm(root)
+
+
 def check_environment(root: pathlib.Path, block_id: str) -> list[Finding]:
     findings: list[Finding] = []
-    findings.extend(_probe_pnpm(root))
+    findings.extend(_probe_pnpm_conditional(root))
     findings.extend(_probe_claude_cli())
     findings.extend(_probe_disk_space(root))
     findings.extend(_probe_orchestrator_lock(root, block_id))
@@ -849,12 +862,17 @@ def check_environment(root: pathlib.Path, block_id: str) -> list[Finding]:
 # rejects any `base_sha` whose tree is missing any of them.
 
 REQUIRED_HARNESS_FILES = (
-    # Gate 1 runner (Node/pnpm default; swap for your stack)
-    "package.json",
-    "scripts/quality-gate.py",
+    # Aevum core (always required at base_sha; orchestrator's own
+    # machinery)
     "scripts/baseline-diff.py",
     "scripts/check-stale-gate-verdicts.py",
     "scripts/check-fix-loop-budget.py",
+    # Gate 1 runner files (Node/pnpm default; swap for your stack at
+    # the Gate-1 seam, see docs/swap-points.md). These stay required
+    # because Aevum ships them as the default and they must exist in
+    # the tree at base_sha for the gate chain to run. Replace with
+    # your stack's equivalent file paths when you swap the runner.
+    "scripts/quality-gate.py",
     ".claude/scripts/pnpm-locked-gate.sh",
     # Inner orchestrator
     ".claude/scripts/orchestrate-block.prompt.md",
@@ -1001,7 +1019,7 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover
         description="Validate a block plan and state.yaml against base_sha "
                     "before the orchestrator launches workers.",
     )
-    parser.add_argument("block_id", help="e.g. F1")
+    parser.add_argument("block_id", help="e.g. B1")
     parser.add_argument(
         "--base-sha",
         help="override base_sha from block.yaml",

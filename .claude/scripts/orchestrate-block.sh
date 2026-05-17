@@ -31,16 +31,16 @@
 #      from the ledger tail.
 #   7. Trap on EXIT/INT/TERM kills the inner-claude process group as a
 #      whole (`kill -- -$INNER_PGID`, 10 s grace, SIGKILL fallback).
-#      The process-group design is the fix for TD-wrapper-process-
-#      group-trap surfaced by the F2 cl-03 orphan incident: a 14-hour
-#      orphan inner-claude that survived its parent wrapper's death
-#      because the previous trap only killed the immediate subshell
-#      PID, leaving claude + tee + subagents reparented to init.
+#      The process-group design fixes an orphan class surfaced by
+#      upstream production: a long-lived orphan inner-claude that
+#      survived its parent wrapper's death because the previous trap
+#      only killed the immediate subshell PID, leaving claude + tee
+#      + subagents reparented to init.
 #      Why job control, not setsid: setsid forks itself (parent dies,
 #      child becomes session leader), so `$!` captures the dead parent,
 #      not the live PGID. `set -m` puts the backgrounded subshell in
 #      its own pgrp directly; `$!` then equals both the leader's PID
-#      and the new PGID. Verified by smoke test 2026-04-26.
+#      and the new PGID. Verified by upstream smoke testing.
 #
 # Exit codes:
 #   0   block finished (signed off / rejected / aborted cleanly)
@@ -241,7 +241,7 @@ cleanup() {
   # the group: the subshell, claude, tee, and every subagent / Bash-
   # tool subprocess claude has spawned. Without this, SIGTERM to the
   # immediate subshell PID leaves claude and its descendants
-  # reparented to init, the F2 cl-03 orphan bug.
+  # reparented to init (the orphan bug upstream production surfaced).
   if [[ -n "${INNER_PGID:-}" ]] && kill -0 -- "-$INNER_PGID" 2>/dev/null; then
     kill -TERM -- "-$INNER_PGID" 2>/dev/null || true
     # Give the group 10 s to exit gracefully. Subagents may use this
@@ -325,9 +325,9 @@ PY
     while IFS= read -r wt_path; do
       [[ -z "$wt_path" ]] && continue
       # Autosave uncommitted work on the worker branch before removing
-      # the worktree. F3 cl-03 lost ~2 h of T01 + T02 productive work
-      # 2026-04-27T19:14:29Z because a false-positive wedge fired and
-      # `git worktree remove -f -f` destroyed the unconcommitted state.
+      # the worktree. An upstream cluster lost ~2 h of parallel-worker
+      # productive work when a false-positive wedge fired and
+      # `git worktree remove -f -f` destroyed the uncommitted state.
       # The wedge detector now watches worker filesystem activity
       # (third signal in the loop above), so false positives should be
       # rare. This autosave is a belt-and-braces safety net for real
@@ -346,8 +346,7 @@ PY
             # with secrets, gitignored build artefacts). The carve-out
             # in commit-policy.md was always meant to be temporary.
             # This path is now deterministic and aligned with the
-            # rest of the project's staging discipline. See F4 cl-01
-            # T03.
+            # rest of the project's staging discipline.
             #
             # Pipeline:
             #   1. Enumerate candidates via `git ls-files`
@@ -531,14 +530,15 @@ fi
 export BLOCK_ID="$BLOCK_ID"
 export LEDGER="$LEDGER"
 
-# Widen the per-check gate timeout for block-scale runs. F1 closed with
-# TD-F1-turbo-test-timeout (900 s wall-clock on cl-06 moat-proof) as an
-# operator-reviewed non-blocker; block-era gate workloads accumulate
-# more tests than a dev-local 900 s budget can tolerate reliably.
-# Default: 1800 s (30 min). Operator override: set GATE_TIMEOUT_SECONDS
-# in the environment before invoking this wrapper to raise or lower.
-# quality-gate.py reads the var (default 900 if unset). Variable-first
-# discipline: no block-era budget hardcoded in call sites.
+# Widen the per-check gate timeout for block-scale runs. Block-era
+# gate workloads accumulate more tests than a dev-local 900 s budget
+# can tolerate reliably. Upstream production hit timeouts on the
+# previous 900 s default; the project bumped to 1800 s and made it
+# overridable. Default: 1800 s (30 min). Operator override: set
+# GATE_TIMEOUT_SECONDS in the environment before invoking this
+# wrapper to raise or lower. quality-gate.py reads the var (default
+# 900 if unset). Variable-first discipline: no block-era budget
+# hardcoded in call sites.
 export GATE_TIMEOUT_SECONDS="${GATE_TIMEOUT_SECONDS:-1800}"
 
 # Prefix the prompt with a plain-text header the model can parse without
@@ -553,7 +553,7 @@ FULL_PROMPT="${PROMPT_HEADER}${PROMPT_BODY}"
 
 # Run claude in the background with stdout teed to STDOUT_TAIL so we can
 # measure silence. Two non-obvious mechanics, each load-bearing for the
-# orphan-prevention contract (TD-wrapper-process-group-trap, F2 cl-03):
+# orphan-prevention contract (upstream-hardening, process-group trap):
 #
 #   (a) `set -m` enables bash job control for this spawn only. With
 #       monitor mode on, the backgrounded subshell goes into a brand-new
@@ -577,8 +577,9 @@ FULL_PROMPT="${PROMPT_HEADER}${PROMPT_BODY}"
 # We previously tried `setsid bash -c ...` (commits prior to this one).
 # It compiled and ran, but `$!` captured the parent setsid process,
 # which exits immediately after forking its session-leader child. The
-# trap's kill targeted a dead PID, the orphan bug remained. Smoke-tested
-# 2026-04-26.
+# trap's kill targeted a dead PID, the orphan bug remained.
+# Smoke-tested during upstream hardening before adopting the
+# job-control approach above.
 #
 # Final-line `__CLAUDE_EXIT_CODE__=$?` is appended after the pipeline so
 # the wrapper can recover claude's exit code through the tee pipe (the
@@ -738,7 +739,7 @@ while kill -0 "$INNER_PID" 2>/dev/null; do
     # Kill the inner process group as a whole, not just the leader PID.
     # Subagents and Bash-tool subprocesses share the group via the
     # `set -m` spawn block above; without group kill they survive as
-    # orphans (TD-wrapper-process-group-trap, F2 cl-03 incident).
+    # orphans (upstream-hardening, process-group trap).
     kill -TERM -- "-$INNER_PGID" 2>/dev/null || true
     break
   fi
@@ -834,8 +835,8 @@ fi
 # finds the inner gone and exits without grepping. Without this final
 # check, a SENTINEL + clean-exit combination is misread as
 # block-finished (exit 0), the outer caller does not re-spawn, and
-# the operator is dropped to the shell mid-block. Observed
-# 2026-04-24T06:32Z on F5a after cl-02b close.
+# the operator is dropped to the shell mid-block. Observed upstream
+# after a SENTINEL emission immediately preceded a cluster close.
 if [[ $ROTATE_REQUESTED -eq 0 ]] && grep -q "SENTINEL::CONTEXT_LIMIT_REACHED" "$STDOUT_TAIL"; then
   emit "rotation_triggered" "{\"detected_at\":\"post_inner_exit\",\"inner_exit\":$INNER_EXIT}"
   ROTATE_REQUESTED=1

@@ -2,8 +2,15 @@
 name: config-validator
 description: Scans the codebase for hardcoded values that violate the design principles (Configuration over Code, Variable First) and for forbidden patterns declared in .claude/rules/forbidden-patterns.md. Runs as Gate 2 before every merge.
 model: sonnet
-tools: Read, Grep, Glob, Bash
-disallowedTools: [Edit, Write, NotebookEdit]
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+disallowedTools:
+  - Edit
+  - Write
+  - NotebookEdit
 maxTurns: 30
 ---
 

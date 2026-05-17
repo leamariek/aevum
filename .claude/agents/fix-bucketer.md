@@ -2,8 +2,15 @@
 name: fix-bucketer
 description: Reads gate JSONs and raw stderr from logs/gates/raw/, deterministically buckets errors by category + module + regex match, and adds a one-paragraph root-cause hypothesis per bucket. Writes fix-buckets.json.
 model: opus
-tools: Read, Bash, Grep, Glob
-disallowedTools: [Edit, Write, NotebookEdit]
+tools:
+  - Read
+  - Bash
+  - Grep
+  - Glob
+disallowedTools:
+  - Edit
+  - Write
+  - NotebookEdit
 maxTurns: 30
 ---
 

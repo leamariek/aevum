@@ -118,8 +118,8 @@ while (( rotation < MAX_ROTATIONS )); do
       # rejected / aborted cleanly)". All three land as exit 0, so we
       # peek the ledger to tell them apart. Aborts are recoverable after
       # operator intervention; treating them as "finished cleanly"
-      # silently drops the block (observed 2026-04-24T12:13Z on F5a
-      # with reason=dirty_resume_worktree).
+      # silently drops the block (observed upstream when a
+      # dirty_resume_worktree abort was misclassified as clean).
       #
       # Heuristic: the most recent non-wrapper / non-heartbeat event is
       # the substantive terminal state.

@@ -82,7 +82,7 @@ reasoning behind each choice.
 ### Install
 
 ```bash
-git clone https://github.com/<you>/aevum.git
+git clone https://github.com/leamariek/aevum.git
 cd aevum
 
 # Optionally drop the harness into an existing project:

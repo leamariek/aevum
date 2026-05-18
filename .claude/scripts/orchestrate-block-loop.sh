@@ -15,17 +15,26 @@
 # All extra args pass through to orchestrate-block.sh verbatim.
 #
 # Environment:
-#   MAX_ROTATIONS   default 15. Cap on rotations per loop. A
-#                       well-scoped block typically needs 2-6
-#                       rotations; 15 is generous and prevents
-#                       runaway loops.
-#   ROTATION_GAP_S  default 5. Sleep between rotations to let any
-#                       worker-worktree cleanup or lock release
-#                       settle before the next inner invocation.
+#   MAX_ROTATIONS     default 15. Cap on rotations per loop. A
+#                         well-scoped block typically needs 2-6
+#                         rotations; 15 is generous and prevents
+#                         runaway loops.
+#   ROTATION_GAP_S    default 5. Sleep between rotations to let any
+#                         worker-worktree cleanup or lock release
+#                         settle before the next inner invocation.
+#   API_ERROR_RETRIES default 3. Cap on retries when inner claude
+#                         exits with code 1 (common cause: transient
+#                         API error like network drop, rate limit, or
+#                         5xx). Retries consume rotations from the
+#                         MAX_ROTATIONS budget and sleep
+#                         ROTATION_GAP_S between attempts. Set to 0
+#                         to disable retries entirely and treat exit
+#                         1 as terminal (legacy behaviour).
 #
 # Exit codes (passed through from the inner on terminal exit):
 #   0    block finished cleanly (sign-off honoured or block_complete)
-#   1    inner claude exited non-zero (terminal; loop does not retry)
+#   1    inner claude exited non-zero AFTER API_ERROR_RETRIES retries
+#        (terminal). See API_ERROR_RETRIES env var.
 #   2    inner setup error (terminal; loop does not retry)
 #   100  MAX_ROTATIONS exhausted; loop abandons rather than spin
 #   130  loop interrupted by SIGINT / SIGTERM (operator Ctrl-C)
@@ -36,8 +45,11 @@
 #   distinguishable from orchestrator-internal events:
 #     loop_start         when the loop first runs
 #     loop_rotation      between successful rotations on exit 4
+#     loop_api_retry     between retries on exit 1 within
+#                        API_ERROR_RETRIES cap
 #     loop_terminated    on exit (block_finished | orchestrator_error
-#                        | max_rotations_exceeded | interrupted)
+#                        | api_retries_exhausted |
+#                        max_rotations_exceeded | interrupted)
 #
 # Lock:
 #   The loop relies on the inner orchestrator's per-block lock
@@ -173,6 +185,26 @@ PY
       ledger_event "loop_rotation" \
         "{\"loop_pid\":$loop_pid,\"rotation\":$rotation,\"sleep_s\":$GAP_S}"
       echo "[loop] inner exited 4 (rotation requested); sleeping ${GAP_S}s then re-invoking" >&2
+      sleep "$GAP_S"
+      ;;
+    1)
+      # Exit code 1 from claude -p is "inner exited non-zero". Common
+      # causes: transient API error (network drop, rate limit, 5xx),
+      # context-buffer flush issue, or a real internal claude error.
+      # We cannot distinguish "transient and recoverable" from
+      # "permanent and structural" by exit code alone. Retry up to
+      # API_ERROR_RETRIES times within the same rotation budget
+      # before treating as terminal.
+      api_retries_used=$(( ${api_retries_used:-0} + 1 ))
+      if (( api_retries_used > ${API_ERROR_RETRIES:-3} )); then
+        ledger_event "loop_terminated" \
+          "{\"reason\":\"api_retries_exhausted\",\"loop_pid\":$loop_pid,\"rotations\":$rotation,\"final_exit\":$EXIT,\"api_retries_used\":$api_retries_used,\"api_error_retries_cap\":${API_ERROR_RETRIES:-3}}"
+        echo "[loop] inner exited 1 after $api_retries_used API-error retries (cap ${API_ERROR_RETRIES:-3}); terminal" >&2
+        exit "$EXIT"
+      fi
+      ledger_event "loop_api_retry" \
+        "{\"loop_pid\":$loop_pid,\"rotation\":$rotation,\"api_retries_used\":$api_retries_used,\"api_error_retries_cap\":${API_ERROR_RETRIES:-3},\"sleep_s\":$GAP_S}"
+      echo "[loop] inner exited 1 (likely transient API error); API retry $api_retries_used/${API_ERROR_RETRIES:-3} after ${GAP_S}s sleep" >&2
       sleep "$GAP_S"
       ;;
     *)

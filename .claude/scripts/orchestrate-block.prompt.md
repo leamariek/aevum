@@ -264,6 +264,42 @@ Merges:
 `merge(...)` subjects are forbidden. If you type one, the commit-policy
 hook rejects it.
 
+### 5a. Creating the integration branch at block_start
+
+The integration branch must exist before §6.1's `git rev-parse` lookup
+succeeds. Create it explicitly as part of the block_start sequence:
+
+1. Read `base_branch` and `base_sha` from `block.yaml`.
+2. Verify `base_sha` is reachable from `base_branch`:
+   `git merge-base --is-ancestor <base_sha> <base_branch>`. If it
+   returns non-zero, emit
+   `block_abort{reason:"base_sha_unreachable_from_base_branch"}` and
+   stop.
+3. Create the integration branch FROM `base_branch` tip, NOT from
+   `base_sha`:
+   `git checkout -B block/<BLOCK>/integration <base_branch>`.
+
+Rationale: the integration branch must start at `base_branch` tip
+(typically `main`) so all post-`base_sha` commits on `base_branch`
+are in integration's history from the start. The activation commit
+that flipped `status: draft` to `status: active` and refreshed
+`base_sha`, plus any pre-block-open hotfixes the founder landed on
+`main`, all live on `base_branch` between `base_sha` and `HEAD`. If
+integration is forked from `base_sha` instead, those commits are NOT
+in integration's history; a restart of a wedged block then sees
+integration's `block.yaml` at its pre-activation state, and preflight
+rejects the restart with `status: draft` plus a missing
+`baseline.json` blocker. The founder must manually `git checkout
+<base_branch> -- docs/blocks/<BLOCK>/block.yaml` on integration to
+recover.
+
+Workers continue to fork from `base_sha` per §6.2's BASE field.
+`base_sha` is the worker fork point; `base_branch` tip is the
+integration fork point. They differ in general; the activation
+commit's parent equals `base_sha` (or an earlier ancestor) and the
+activation commit itself sits on `base_branch` between `base_sha`
+and `HEAD`.
+
 ## 6. Cluster execution loop
 
 For each cluster in topological order of `depends_on`:

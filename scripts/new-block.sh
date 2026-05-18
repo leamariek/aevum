@@ -19,9 +19,9 @@
 #   bash scripts/new-block.sh --plan-only <BLOCK_ID> "<Title>" <owner>
 #
 # Examples:
-#   bash scripts/new-block.sh B1 "Payments refactor" leamariek
+#   bash scripts/new-block.sh B1 "Payments refactor" alice
 #   bash scripts/new-block.sh AUTH-MIGRATION "Move session tokens to JWT" ops
-#   bash scripts/new-block.sh --plan-only EXAMPLE "Minimal no-op smoke" leamariek
+#   bash scripts/new-block.sh --plan-only EXAMPLE "Minimal no-op smoke" alice
 #
 # Modes:
 #   default     create both block.yaml and the paired plan.md.

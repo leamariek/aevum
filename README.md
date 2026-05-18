@@ -241,10 +241,10 @@ to write your own.
 
 ## License
 
-PolyForm Noncommercial 1.0.0. Free for non-commercial use
-(personal projects, research, education, evaluation). Commercial
-use requires a separate license from the copyright holder. See
-[`LICENSE`](LICENSE) for the full terms.
+Apache License 2.0. Free for any use, commercial or
+non-commercial, with attribution and the standard patent grant.
+Copyright (c) 2026 Lea Korsawe. See [`LICENSE`](LICENSE) for the
+full terms.
 
-If you find Aevum useful for non-commercial work, an issue or a
-star is the best signal back. Pull requests welcome.
+If you find Aevum useful, an issue or a star is the best signal
+back. Pull requests welcome.

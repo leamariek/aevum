@@ -63,6 +63,23 @@ Read every file in your `FILES_TOUCHED_GLOBS` once. Do not re-scan
 unrelated files; the orchestrator's gate agents enforce module
 isolation and will reject diffs that wander.
 
+### Step 2.5: plan the approach (inline)
+
+You are dispatched non-interactively; no operator is in the loop to
+catch a misframed approach before the diff exists. For any task that
+touches more than one file or a shared contract, write a 3-to-6 line
+approach note (what changes, in which files, why) into this task's
+prompt bundle under `logs/blocks/<BLOCK>/`, the existing home for
+ephemeral per-task reasoning. A single-file trivial task may skip it.
+
+This note is disposable worker discipline, not a reviewed artefact.
+Gate 3b (`code-reviewer`) never reads it: the reviewer sees only the
+durable diff, the gate JSONs, and `block.yaml`, none of which include
+the bundle. Its only job is to make you frame the change before you
+write it. A genuine deviation from the dispatched `GOAL` still has to
+be logged where R9 requires (`HANDOVER.md` or the active block's
+narrative plan).
+
 ### Step 3: implement
 
 <TODO: describe the typical work pattern for this specialist. For a
@@ -112,6 +129,24 @@ Match the contract in
   explicit coordination note from the orchestrator.
 - **Never write narrative or opinions in commit messages.** Subject
   describes the change; body describes the why if non-obvious.
+- **Surface conflicts and ambiguity; do not guess.** If a load-bearing
+  ambiguity, a conflict with a shared contract you consume but do not
+  own (`workflow.md` R3), a sibling-task conflict, or a task only
+  satisfiable by breaking a rule survives reading the envelope and the
+  surface, do not invent an interpretation or silently work around it.
+  Return `status: failed` with a specific `reason` (for example
+  `"needs clarification: <question>"` or
+  `"no_progress_possible: <rule id>"`), or implement the rule-compliant
+  version and log an R9 deviation (`HANDOVER.md` or the active block's
+  narrative plan). Only the durable diff and that log reach Gate 3b. See
+  `workflow.md` R11.
+- **Build the smallest thing that meets `ACCEPTANCE`.** No speculative
+  abstraction or scaffolding the criteria do not require; prefer the
+  obviously-correct implementation first and optimize only when a
+  criterion demands it; delete the code your change supersedes
+  (commented-out blocks, uncalled helpers) before committing; do not
+  touch comments or code orthogonal to the task. See
+  `.claude/rules/simplicity-discipline.md`.
 
 ## Smoke
 

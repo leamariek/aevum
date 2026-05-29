@@ -2,7 +2,7 @@
 id: design-notes
 title: Aevum Design Notes
 created: 2026-05-17T00:00:00Z
-updated: 2026-05-17T00:00:00Z
+updated: 2026-05-29T00:00:00Z
 status: active
 owner: founder
 ---
@@ -195,7 +195,7 @@ authored per project from
 
 ## Why an opinionated rule set
 
-The harness ships 12 rules in `.claude/rules/`. Most are short
+The harness ships 13 rules in `.claude/rules/`. Most are short
 (under 100 lines). The set is opinionated: it picks the convention
 the author finds works, rather than offering choices.
 

@@ -44,7 +44,7 @@ reference earlier ones.
 8. **[doc-lifecycle.md](./doc-lifecycle.md)**: status-transition
    graph, move-on-close rule, archive-README requirement.
 9. **[workflow.md](./workflow.md)**: the 8-step orchestrated session
-   workflow and rules R1 to R10. Direct (non-orchestrated) work is
+   workflow and rules R1 to R11. Direct (non-orchestrated) work is
    exempt; the workflow applies to subagent-driven block sessions.
 10. **[frontend-tooling.md](./frontend-tooling.md)**: optional Chrome
     DevTools MCP operational notes (WSL2 networking, Chrome launch
@@ -56,6 +56,11 @@ reference earlier ones.
     cause, not N symptoms. Bans variable-extraction-as-fix and
     mechanical find-replace diffs that do not change runtime
     behaviour.
+13. **[simplicity-discipline.md](./simplicity-discipline.md)**: the
+    smallest correct change. Bans speculative abstraction, dead code
+    left behind, and orthogonal churn; pairs naive-correct-first with
+    optimize-preserving-correctness. Enforced at Gate 3b (code-reviewer)
+    and prevented at the worker template.
 
 ## How these rules are enforced
 

@@ -42,6 +42,10 @@ merged PR). Keep steps small enough to commit individually.
 2. Step 2: produces …
 3. Step 3: produces …
 
+*Optionally, record the alternatives weighed:* the approach(es) rejected
+and why, one line each. If a choice rises to architectural weight, record
+it as an ADR under `docs/adr/` instead of here.
+
 ## Critical files
 
 - `path/to/file-1.ts`: role in this plan.

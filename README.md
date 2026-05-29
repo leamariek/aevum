@@ -174,10 +174,12 @@ branch onto `main` is a human action (not part of the harness).
 6. `repo-hygiene.md`: directory layout, naming, archival.
 7. `plan-metadata.md`: YAML frontmatter contract.
 8. `doc-lifecycle.md`: status-transition graph, move-on-close rule.
-9. `workflow.md`: the 8-step session workflow and R1 to R10.
+9. `workflow.md`: the 8-step session workflow and R1 to R11.
 10. `frontend-tooling.md`: optional Playwright / Chrome DevTools MCP.
 11. `block-discipline.md`: kill criteria, preflight validation.
 12. `fix-discipline.md`: fix upstream, not N symptoms.
+13. `simplicity-discipline.md`: the smallest correct change; bans
+    speculative abstraction, dead code, orthogonal churn.
 
 Each rule is short and self-contained. Hooks enforce the
 mechanically-checkable parts; review agents enforce the rest.

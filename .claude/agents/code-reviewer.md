@@ -75,6 +75,29 @@ only files actually touched.
       note).
 - Reference: `.claude/rules/repo-hygiene.md §Directory layout`.
 
+### Simplicity and diff hygiene
+
+- [ ] Implementation size and structure are proportional to the task
+      scope declared in `block.yaml` (the cluster goal plus its
+      acceptance criteria). Flag a build that is large or convoluted
+      relative to that scope even when every file is under 400 LOC;
+      the per-file smell above misses bloat spread thin across many
+      small files.
+- [ ] No orthogonal drive-by edits: every changed file traces to the
+      dispatched goal or to a logged deviation (R9). A diff that wanders
+      beyond the task scope is a finding.
+- [ ] No dead code, unused scaffolding, or speculative abstraction the
+      acceptance criteria do not require.
+- [ ] A material decision visible in the diff (a swapped dependency, a
+      new env var, a contract change) is logged where R9 requires; an
+      unlogged one is a finding. Assumptions not visible in the diff are
+      worker-template discipline, not a Gate 3b dimension.
+- Reference: `.claude/rules/simplicity-discipline.md` (smallest correct
+  change), `.claude/rules/fix-discipline.md` (fix upstream, no
+  mechanical bloat), and `.claude/rules/design-principles.md` (Schema
+  First, Module Isolation). This subsection marks the boundary: bloat
+  and orthogonal edits are diff-visible and reviewable here.
+
 ### Domain hygiene (project-specific)
 
 Aevum ships no domain hygiene checklist of its own. Projects add

@@ -28,6 +28,8 @@ Only these files may live at the repo root:
   start here."
 - `HANDOVER.md`: append-only session log (created on first session).
 - `README.md`: external-facing overview.
+- `CHANGELOG.md`: version history in Keep a Changelog format; the
+  detailed per-version rationale lives under `docs/plans/`.
 - `LICENSE`: source-available or open-source license text.
 - Build, tooling, and package-manager config that the language
   toolchain expects at the root (for example `.gitignore`,
@@ -41,8 +43,8 @@ Only these files may live at the repo root:
 Planning, status, backlog, handoff, gap-analysis documents all live
 under `docs/` or `archive/`.
 
-**No loose `*.md` at the root other than the four named above
-(`CLAUDE.md`, `HANDOVER.md`, `README.md`, `LICENSE`).**
+**No loose `*.md` at the root other than the five named above
+(`CLAUDE.md`, `HANDOVER.md`, `README.md`, `CHANGELOG.md`, `LICENSE`).**
 
 ## Directory layout
 
@@ -111,5 +113,5 @@ linter.
 3. Update inbound references (`grep -r <old-name>` then patch).
 4. Commit as `chore(<scope>): move <old> to <new>`.
 
-Root-level `.md` other than the four named above is a bug; open a PR
+Root-level `.md` other than the five named above is a bug; open a PR
 to move it.

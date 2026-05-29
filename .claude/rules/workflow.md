@@ -2,7 +2,7 @@
 id: workflow
 title: 8-Step Session Workflow
 created: 2026-05-13T00:00:00Z
-updated: 2026-05-17T00:00:00Z
+updated: 2026-05-29T00:00:00Z
 status: active
 owner: founder
 ---
@@ -28,7 +28,10 @@ reference.
    `logs/blocks/<BLOCK>/<session-id>-task-<task-id>-prompt.md`.
 3. **Implement**: per-task subagents (whichever specialists the project
    registers under `.claude/agents/`) do the work on
-   `block/<BLOCK_ID>/<cluster_id>-<task_id>` worker branches.
+   `block/<BLOCK_ID>/<cluster_id>-<task_id>` worker branches. Workers
+   may self-plan inline first (a short approach note in the task's
+   prompt bundle) before writing the diff; see `examples/agents/AGENT_TEMPLATE.md`
+   Step 2.5.
 4. **Gate 1 (build, lint, typecheck, test)**: runs via the project's
    Gate-1 runner. Aevum's default runner is
    `bash .claude/scripts/gate1.sh --force` (Node/pnpm
@@ -55,7 +58,12 @@ reference.
   to a logged deviation in the active block's plan or `HANDOVER.md`.
 - **R2**: Tests are written alongside the code, not after. Default
   coverage target is at least 80% per domain where a test runner is
-  wired; projects override at adoption time.
+  wired; projects override at adoption time. Where a runner is wired
+  and the acceptance criterion is mechanically testable, prefer
+  authoring the test that encodes the criterion first, then
+  implementing to green, so the worker loops against its own test
+  rather than a downstream gate; this is the same declarative-acceptance
+  leverage `criteria-checker` applies at Gate 3a.
 - **R3**: Changes to shared types or the shared store need
   coordination (the store is typically a DAG leaf; everything depends
   on it). Coordinate via comment in PR or `HANDOVER.md` before a
@@ -73,10 +81,21 @@ reference.
 - **R8**: Session plans and phase plans carry valid YAML frontmatter
   (see `plan-metadata.md`).
 - **R9**: Deviations from the active block plan are logged in the
-  block's `block.yaml` `deviations:` array or in `HANDOVER.md` with
-  date and reason.
+  active block's narrative plan or in `HANDOVER.md`, with date and
+  reason.
 - **R10**: Commits follow Conventional Commits and never carry
   AI-authorship trailers (see `commit-policy.md`).
+- **R11**: Workers fail loud, they do not guess. When a load-bearing
+  ambiguity, a conflict with a shared contract the worker consumes but
+  does not own (R3), a sibling-task conflict, a task that can only be
+  satisfied by breaking a rule, or a dispatched premise the worker
+  believes is wrong survives reading the envelope and the surface, the
+  worker surfaces it rather than inventing an interpretation, silently
+  working around it, or complying anyway: return `status: failed` with a
+  specific `reason`, or implement the rule-compliant version and log an
+  R9 deviation. Prevented at the worker template
+  (`examples/agents/AGENT_TEMPLATE.md`); only the durable diff and the R9
+  log reach Gate 3b.
 
 ## State files
 
